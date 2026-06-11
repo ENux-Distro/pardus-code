@@ -5,9 +5,10 @@
 #   curl -fsSL https://raw.githubusercontent.com/ENux-Distro/pardus-code/main/install | bash
 #
 # What it does:
-#   1. installs the runtime deps (tmux, nano, fzf) when it can
-#   2. downloads the Pardus Code source and the PARDUS-branded opencode binary
-#   3. runs the bundled install.sh (per-user, into ~/.local by default)
+#   1. installs the deps it needs (git, tmux, nano, fzf) when it can
+#   2. git-clones the Pardus Code repo and downloads the PARDUS-branded opencode
+#      binary from the latest Release (falls back to upstream opencode if absent)
+#   3. runs the repo's install.sh (per-user, into ~/.local by default)
 #
 # Tunables (env):
 #   PARDUS_CODE_REPO    GitHub "owner/repo"            (default ENux-Distro/pardus-code)
@@ -55,9 +56,10 @@ if [ "$ARCH" != "x86_64" ] && [ "$ARCH" != "amd64" ]; then
 fi
 
 # --- dependencies ----------------------------------------------------------
+# git is needed to clone the repo; tmux/nano/fzf are the runtime deps.
 if [ "${PARDUS_CODE_NO_DEPS:-0}" != "1" ]; then
   need=()
-  for c in tmux nano fzf; do command -v "$c" >/dev/null 2>&1 || need+=("$c"); done
+  for c in git tmux nano fzf; do command -v "$c" >/dev/null 2>&1 || need+=("$c"); done
   if [ "${#need[@]}" -gt 0 ]; then
     if command -v apt-get >/dev/null 2>&1; then
       say "Installing dependencies: ${need[*]}"
@@ -67,18 +69,17 @@ if [ "${PARDUS_CODE_NO_DEPS:-0}" != "1" ]; then
     fi
   fi
 fi
+command -v git >/dev/null 2>&1 || die "git is required to install Pardus Code."
 
 # --- workspace -------------------------------------------------------------
 TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
-say "Downloading Pardus Code ($REPO@$REF)…"
-fetch "https://github.com/$REPO/archive/refs/heads/$REF.tar.gz" "$TMP/src.tar.gz" \
-  || fetch "https://github.com/$REPO/archive/refs/tags/$REF.tar.gz" "$TMP/src.tar.gz" \
-  || die "Could not download source for $REPO@$REF."
-tar -xzf "$TMP/src.tar.gz" -C "$TMP"
-SRC="$(find "$TMP" -maxdepth 1 -type d -name 'pardus-code-*' | head -1)"
-[ -n "$SRC" ] || die "Unexpected archive layout."
+say "Cloning Pardus Code ($REPO@$REF)…"
+SRC="$TMP/pardus-code"
+git clone --depth 1 --branch "$REF" "https://github.com/$REPO.git" "$SRC" 2>/dev/null \
+  || git clone --depth 1 "https://github.com/$REPO.git" "$SRC" \
+  || die "Could not clone https://github.com/$REPO (check the repo name / network)."
 
 # --- the branded opencode binary (a Release asset) -------------------------
 say "Downloading the PARDUS opencode binary…"
