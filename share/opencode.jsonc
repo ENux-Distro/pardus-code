@@ -1,37 +1,28 @@
 {
   // ==========================================================================
   //  Pardus Code — opencode settings
-  //  Layered OVER your existing global opencode config (your login/auth and
-  //  personal settings are preserved). Theme lives in pardus.tui.json.
+  //  Layered OVER your existing global opencode config (auth/personal settings
+  //  are preserved). The theme lives in pardus.tui.json.
   // ==========================================================================
   "$schema": "https://opencode.ai/config.json",
 
-  // --- Free, no-sign-up AI -------------------------------------------------
-  // Pardus Code is meant to "just work" with free models. Pick ONE approach
-  // and set "model" below (or leave it unset to use whatever you already have):
+  // --- Free AI, no sign-up, no API key -------------------------------------
+  // opencode's "OpenCode Zen" free models work anonymously: when you are not
+  // logged in, opencode connects with a public key and only offers the free
+  // (zero-cost) models. We pin one here so Pardus Code just works out of the
+  // box — no `opencode auth login`, no model picker.
   //
-  //   1) opencode's hosted free tier (easiest — a free account, no API key):
-  //        run once:  opencode auth login   ->  choose "opencode"
-  //        "model": "opencode/grok-code-fast-1"
-  //
-  //   2) Fully local, zero account, zero key (needs Ollama installed):
-  //        ollama pull qwen2.5-coder:7b
-  //      then uncomment the provider block below and set:
-  //        "model": "ollama/qwen2.5-coder:7b"
-  //
-  // "model": "opencode/grok-code-fast-1",
+  // Other free models you can switch to (run `opencode models` to see current):
+  //   opencode/deepseek-v4-flash-free
+  //   opencode/north-mini-code-free
+  //   opencode/mimo-v2.5-free
+  //   opencode/nemotron-3-ultra-free
+  // If a pinned model is ever retired, swap this line for one of the above.
+  "model": "opencode/big-pickle",
 
-  // --- Local Ollama provider (uncomment to use option 2) -------------------
-  // "provider": {
-  //   "ollama": {
-  //     "npm": "@ai-sdk/openai-compatible",
-  //     "name": "Ollama (local)",
-  //     "options": { "baseURL": "http://localhost:11434/v1" },
-  //     "models": {
-  //       "qwen2.5-coder:7b": { "name": "Qwen2.5 Coder 7B" }
-  //     }
-  //   }
-  // },
+  // Want more/better models? `opencode auth login` (free account) unlocks them,
+  // or add a local Ollama provider for fully offline use — but neither is
+  // required for Pardus Code to work.
 
   "autoupdate": false
 }

@@ -83,20 +83,11 @@ SRC="$(find "$TMP" -maxdepth 1 -type d -name 'pardus-code-*' | head -1)"
 # --- the branded opencode binary (a Release asset) -------------------------
 say "Downloading the PARDUS opencode binary…"
 mkdir -p "$SRC/vendor"
-if fetch "https://github.com/$REPO/releases/latest/download/$BINARY_ASSET" "$SRC/vendor/opencode" \
-   && [ -s "$SRC/vendor/opencode" ]; then
+if fetch "https://github.com/$REPO/releases/latest/download/$BINARY_ASSET" "$SRC/vendor/opencode"; then
   chmod +x "$SRC/vendor/opencode"
 else
+  err "Could not fetch the branded binary; Pardus Code will use a system 'opencode' if available."
   rm -f "$SRC/vendor/opencode"
-  err "Branded binary not published yet — installing upstream opencode instead."
-  err "(You still get free AI with no login; just the stock 'opencode' logo.)"
-  if ! command -v opencode >/dev/null 2>&1 && [ ! -x "$HOME/.opencode/bin/opencode" ]; then
-    if command -v curl >/dev/null 2>&1; then
-      curl -fsSL https://opencode.ai/install | bash || err "Upstream opencode install failed; install it manually from https://opencode.ai"
-    else
-      err "Install opencode manually from https://opencode.ai, then re-run."
-    fi
-  fi
 fi
 
 # --- install ---------------------------------------------------------------

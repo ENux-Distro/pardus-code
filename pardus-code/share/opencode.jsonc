@@ -1,0 +1,37 @@
+{
+  // ==========================================================================
+  //  Pardus Code — opencode settings
+  //  Layered OVER your existing global opencode config (your login/auth and
+  //  personal settings are preserved). Theme lives in pardus.tui.json.
+  // ==========================================================================
+  "$schema": "https://opencode.ai/config.json",
+
+  // --- Free, no-sign-up AI -------------------------------------------------
+  // Pardus Code is meant to "just work" with free models. Pick ONE approach
+  // and set "model" below (or leave it unset to use whatever you already have):
+  //
+  //   1) opencode's hosted free tier (easiest — a free account, no API key):
+  //        run once:  opencode auth login   ->  choose "opencode"
+  //        "model": "opencode/grok-code-fast-1"
+  //
+  //   2) Fully local, zero account, zero key (needs Ollama installed):
+  //        ollama pull qwen2.5-coder:7b
+  //      then uncomment the provider block below and set:
+  //        "model": "ollama/qwen2.5-coder:7b"
+  //
+  // "model": "opencode/grok-code-fast-1",
+
+  // --- Local Ollama provider (uncomment to use option 2) -------------------
+  // "provider": {
+  //   "ollama": {
+  //     "npm": "@ai-sdk/openai-compatible",
+  //     "name": "Ollama (local)",
+  //     "options": { "baseURL": "http://localhost:11434/v1" },
+  //     "models": {
+  //       "qwen2.5-coder:7b": { "name": "Qwen2.5 Coder 7B" }
+  //     }
+  //   }
+  // },
+
+  "autoupdate": false
+}

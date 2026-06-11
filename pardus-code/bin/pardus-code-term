@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+#
+# pardus-code-term [WINDOW_ID]
+#
+# Toggle a small, full-width terminal pane across the bottom of the Pardus Code
+# layout:
+#
+#     +----------------------+----------------+
+#     |  opencode            |  nano          |
+#     +----------------------+----------------+
+#     |  terminal (toggled with Ctrl-T)       |
+#     +---------------------------------------+
+#
+# Bound to Ctrl-T. The Ctrl-T binding uses run-shell, which DOES expand tmux
+# formats, so the window id is passed in; we still self-discover as a fallback.
+#
+set -euo pipefail
+
+window="${1:-}"
+[ -n "$window" ] || window="$(tmux display-message -p '#{window_id}' 2>/dev/null || true)"
+[ -n "$window" ] || exit 0
+
+# Is a Pardus Code terminal already open in this window? We track its pane id in
+# a window option so the toggle is reliable even after layout changes.
+term_pane="$(tmux show-options -wqv -t "$window" @pardus_term_pane 2>/dev/null || true)"
+
+if [ -n "$term_pane" ] && tmux list-panes -t "$window" -F '#{pane_id}' 2>/dev/null | grep -qx "$term_pane"; then
+  # Toggle OFF: close the terminal; the opencode/nano panes reclaim the space.
+  tmux kill-pane -t "$term_pane"
+  tmux set-option -w -u -t "$window" @pardus_term_pane 2>/dev/null || true
+  exit 0
+fi
+
+# Toggle ON: a small (12-line) terminal spanning the full width at the bottom.
+# -f makes the new pane full-width relative to the window (below both top panes).
+new_pane="$(tmux split-window -v -f -l 12 -t "$window" -P -F '#{pane_id}' \
+  "exec ${SHELL:-/bin/bash}")"
+tmux set-option -w -t "$window" @pardus_term_pane "$new_pane"
+# Focus the terminal so you can start typing (compile, debug, …) immediately.
+tmux select-pane -t "$new_pane"

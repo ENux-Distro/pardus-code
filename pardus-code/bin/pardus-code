@@ -31,17 +31,12 @@ OPENCODE_PARDUS_TUI="$PARDUS_CODE_HOME/pardus.tui.json"
 WELCOME="$PARDUS_CODE_HOME/WELCOME.md"
 
 # --- pick the AI agent binary ----------------------------------------------
-# Prefer the bundled PARDUS-branded opencode; otherwise use any opencode on
-# PATH; otherwise the default location opencode's own installer uses.
+# Prefer the bundled PARDUS-branded opencode; fall back to a system opencode.
 BUNDLED_OPENCODE="$PARDUS_CODE_HOME/libexec/opencode"
 if [ -x "$BUNDLED_OPENCODE" ]; then
   OPENCODE_BIN="$BUNDLED_OPENCODE"
-elif command -v opencode >/dev/null 2>&1; then
-  OPENCODE_BIN="$(command -v opencode)"
-elif [ -x "$HOME/.opencode/bin/opencode" ]; then
-  OPENCODE_BIN="$HOME/.opencode/bin/opencode"
 else
-  OPENCODE_BIN=""
+  OPENCODE_BIN="$(command -v opencode || true)"
 fi
 
 # --- dependency check -------------------------------------------------------
