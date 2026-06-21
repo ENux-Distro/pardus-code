@@ -5,9 +5,9 @@
 #   curl -fsSL https://raw.githubusercontent.com/ENux-Distro/pardus-code/main/install | bash
 #
 # What it does:
-#   1. installs the deps it needs (git, tmux, nano, fzf) when it can
-#   2. git-clones the Pardus Code repo and downloads the PARDUS-branded opencode
-#      binary from the latest Release (falls back to upstream opencode if absent)
+#   1. installs the deps it needs (git, tmux, nano, fzf, curl, unzip) when it can
+#   2. git-clones the Pardus Code repo, then COMPILES the PARDUS-branded opencode
+#      from the fork (installs the bun toolchain, clones the fork, builds it)
 #   3. runs the repo's install.sh (per-user, into ~/.local by default)
 #
 # Tunables (env):
@@ -15,13 +15,14 @@
 #   PARDUS_CODE_REF     branch or tag of the source    (default main)
 #   PARDUS_CODE_PREFIX  install prefix                  (default ~/.local; use /usr/local for system)
 #   PARDUS_CODE_NO_DEPS set to 1 to skip apt dependency install
+#   OPENCODE_FORK       opencode fork to build (default https://github.com/ENux-Distro/opencode.git)
+#   OPENCODE_FORK_REF   branch/tag of the fork to build (default dev)
 #
 set -euo pipefail
 
 REPO="${PARDUS_CODE_REPO:-ENux-Distro/pardus-code}"
 REF="${PARDUS_CODE_REF:-main}"
 PREFIX="${PARDUS_CODE_PREFIX:-$HOME/.local}"
-BINARY_ASSET="opencode-linux-x64"
 
 say()  { printf '\033[1;33m::\033[0m %s\n' "$*"; }
 err()  { printf '\033[1;31m!!\033[0m %s\n' "$*" >&2; }
@@ -59,7 +60,7 @@ fi
 # git is needed to clone the repo; tmux/nano/fzf are the runtime deps.
 if [ "${PARDUS_CODE_NO_DEPS:-0}" != "1" ]; then
   need=()
-  for c in git tmux nano fzf; do command -v "$c" >/dev/null 2>&1 || need+=("$c"); done
+  for c in git tmux nano fzf curl unzip; do command -v "$c" >/dev/null 2>&1 || need+=("$c"); done
   if [ "${#need[@]}" -gt 0 ]; then
     if command -v apt-get >/dev/null 2>&1; then
       say "Installing dependencies: ${need[*]}"
@@ -81,22 +82,17 @@ git clone --depth 1 --branch "$REF" "https://github.com/$REPO.git" "$SRC" 2>/dev
   || git clone --depth 1 "https://github.com/$REPO.git" "$SRC" \
   || die "Could not clone https://github.com/$REPO (check the repo name / network)."
 
-# --- the branded opencode binary (a Release asset) -------------------------
-say "Downloading the PARDUS opencode binary…"
-mkdir -p "$SRC/vendor"
-if fetch "https://github.com/$REPO/releases/latest/download/$BINARY_ASSET" "$SRC/vendor/opencode" \
-   && [ -s "$SRC/vendor/opencode" ]; then
-  chmod +x "$SRC/vendor/opencode"
+# --- compile the PARDUS-branded opencode from the fork ---------------------
+say "Building the PARDUS opencode binary from source (first run takes a while)…"
+if "$SRC/packaging/build-opencode.sh" "$SRC/vendor/opencode"; then
+  :
 else
   rm -f "$SRC/vendor/opencode"
-  err "Branded binary not published yet — installing upstream opencode instead."
+  err "Could not build the branded opencode — falling back to upstream opencode."
   err "(You still get free AI with no login; just the stock 'opencode' logo.)"
   if ! command -v opencode >/dev/null 2>&1 && [ ! -x "$HOME/.opencode/bin/opencode" ]; then
-    if command -v curl >/dev/null 2>&1; then
-      curl -fsSL https://opencode.ai/install | bash || err "Upstream opencode install failed; install it manually from https://opencode.ai"
-    else
-      err "Install opencode manually from https://opencode.ai, then re-run."
-    fi
+    curl -fsSL https://opencode.ai/install | bash \
+      || err "Upstream opencode install failed; install it manually from https://opencode.ai"
   fi
 fi
 
