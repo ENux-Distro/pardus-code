@@ -60,8 +60,8 @@ install -m 0644 "$SRC_DIR/share/WELCOME.md"       "$SHARE_DIR/WELCOME.md"
 install -m 0644 "$SRC_DIR/share/WELCOME.tr.md"    "$SHARE_DIR/WELCOME.tr.md"
 
 # The Pardus opencode theme ships in our shared assets; the launcher copies it
-# into each user's <config>/opencode/themes on first run (so this works the same
-# for a per-user install and the system-wide .deb).
+# into each user's <config>/opencode/themes on first run (so a per-user and a
+# system-wide install both theme every user correctly).
 install -d "$SHARE_DIR/themes"
 install -m 0644 "$SRC_DIR/share/themes/pardus.json" "$SHARE_DIR/themes/pardus.json"
 
