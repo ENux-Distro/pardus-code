@@ -53,9 +53,11 @@ install -m 0755 "$SRC_DIR/bin/pardus-code-term" "$BIN_DIR/pardus-code-term"
 say "Installing shared assets to $SHARE_DIR"
 install -m 0644 "$SRC_DIR/share/pardus.tmux.conf" "$SHARE_DIR/pardus.tmux.conf"
 install -m 0644 "$SRC_DIR/share/pardus.nanorc"    "$SHARE_DIR/pardus.nanorc"
+install -m 0644 "$SRC_DIR/share/lang.sh"          "$SHARE_DIR/lang.sh"
 install -m 0644 "$SRC_DIR/share/opencode.jsonc"   "$SHARE_DIR/opencode.jsonc"
 install -m 0644 "$SRC_DIR/share/pardus.tui.json"  "$SHARE_DIR/pardus.tui.json"
 install -m 0644 "$SRC_DIR/share/WELCOME.md"       "$SHARE_DIR/WELCOME.md"
+install -m 0644 "$SRC_DIR/share/WELCOME.tr.md"    "$SHARE_DIR/WELCOME.tr.md"
 
 # The Pardus opencode theme ships in our shared assets; the launcher copies it
 # into each user's <config>/opencode/themes on first run (so this works the same

@@ -28,7 +28,15 @@ TMUX_CONF="$PARDUS_CODE_HOME/pardus.tmux.conf"
 NANORC="$PARDUS_CODE_HOME/pardus.nanorc"
 OPENCODE_PARDUS_CONFIG="$PARDUS_CODE_HOME/opencode.jsonc"
 OPENCODE_PARDUS_TUI="$PARDUS_CODE_HOME/pardus.tui.json"
+
+# --- localization (Turkish / English from the system locale) ----------------
+. "$PARDUS_CODE_HOME/lang.sh" 2>/dev/null || {
+  echo "Pardus Code: missing lang.sh — re-run install.sh." >&2; exit 1; }
+
+# Welcome file in the user's language, if a translation is shipped.
 WELCOME="$PARDUS_CODE_HOME/WELCOME.md"
+[ "$PC_LANG" = "tr" ] && [ -f "$PARDUS_CODE_HOME/WELCOME.tr.md" ] && \
+  WELCOME="$PARDUS_CODE_HOME/WELCOME.tr.md"
 
 # --- pick the AI agent binary ----------------------------------------------
 # Prefer the bundled PARDUS-branded opencode; otherwise use any opencode on
@@ -51,16 +59,16 @@ for cmd in tmux nano fzf; do
 done
 [ -n "$OPENCODE_BIN" ] || missing+=("opencode")
 if [ "${#missing[@]}" -gt 0 ]; then
-  echo "Pardus Code: missing dependencies: ${missing[*]}" >&2
-  echo "Install them with the bundled installer, or:" >&2
+  echo "$PC_MISSING_DEPS ${missing[*]}" >&2
+  echo "$PC_INSTALL_HINT" >&2
   echo "  sudo apt install ${missing[*]/opencode/}" >&2
-  echo "(opencode is bundled by install.sh, or get it at https://opencode.ai)" >&2
+  echo "$PC_AGENT_HINT" >&2
   exit 1
 fi
 
 for asset in "$TMUX_CONF" "$NANORC" "$OPENCODE_PARDUS_CONFIG"; do
   if [ ! -f "$asset" ]; then
-    echo "Pardus Code: missing asset '$asset'. Re-run install.sh." >&2
+    printf "$PC_MISSING_ASSET_1 $PC_MISSING_ASSET_2\n" "$asset" >&2
     exit 1
   fi
 done
@@ -68,7 +76,7 @@ done
 # --- target project directory ----------------------------------------------
 PROJECT_DIR="${1:-$PWD}"
 if [ ! -d "$PROJECT_DIR" ]; then
-  echo "Pardus Code: '$PROJECT_DIR' is not a directory." >&2
+  printf "$PC_NOT_A_DIR\n" "$PROJECT_DIR" >&2
   exit 1
 fi
 cd "$PROJECT_DIR"
@@ -114,5 +122,15 @@ tmux -f "$TMUX_CONF" resize-pane -t "$SESSION":0.0 -x 60%
 # Start focused on the AI agent.
 tmux -f "$TMUX_CONF" select-pane -t "$SESSION":0.0
 tmux -f "$TMUX_CONF" set-option -t "$SESSION" @pardus_session "$SESSION"
+
+# Localize the tmux status bar + messages for this session (English defaults
+# live in the config; these override with the locale's strings from lang.sh).
+tmux -f "$TMUX_CONF" set-option -t "$SESSION" @pc_resize     "$PC_TMUX_RESIZE"
+tmux -f "$TMUX_CONF" set-option -t "$SESSION" @pc_swap       "$PC_TMUX_SWAP"
+tmux -f "$TMUX_CONF" set-option -t "$SESSION" @pc_find       "$PC_TMUX_FIND"
+tmux -f "$TMUX_CONF" set-option -t "$SESSION" @pc_term       "$PC_TMUX_TERM"
+tmux -f "$TMUX_CONF" set-option -t "$SESSION" @pc_swapped    "$PC_TMUX_SWAPPED"
+tmux -f "$TMUX_CONF" set-option -t "$SESSION" @pc_resizemode "$PC_TMUX_RESIZEMODE"
+tmux -f "$TMUX_CONF" set-option -t "$SESSION" @pc_resizedone "$PC_TMUX_RESIZEDONE"
 
 exec tmux -f "$TMUX_CONF" attach-session -t "$SESSION"

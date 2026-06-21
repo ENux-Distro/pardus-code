@@ -10,6 +10,16 @@
 #
 set -euo pipefail
 
+# --- localization (Turkish / English from the system locale) ----------------
+# Resolve our shared dir the same way the launcher does, then load the strings.
+PCH="${PARDUS_CODE_HOME:-}"
+if [ -z "$PCH" ]; then
+  SELF="$(readlink -f "$0" 2>/dev/null || echo "$0")"
+  PCH="$(dirname "$(dirname "$SELF")")/share/pardus-code"
+fi
+. "$PCH/lang.sh" 2>/dev/null || {
+  echo "Pardus Code: lang.sh not found — re-run install.sh." >&2; exit 1; }
+
 # Resolve the tmux session this finder should drive.
 #
 # NOTE: tmux's `display-popup` does NOT expand `#{...}` formats in its command,
@@ -25,9 +35,9 @@ fi
 
 # Still nothing usable means we're not running inside Pardus Code at all.
 if [ -z "$session" ] || ! tmux has-session -t "$session" 2>/dev/null; then
-  echo "pardus-code-pick is launched by Ctrl-F inside Pardus Code — it isn't a" >&2
-  echo "standalone command. Start Pardus Code with 'pardus-code' and press" >&2
-  echo "Ctrl-F to find or create files." >&2
+  echo "$PC_PICK_NOT_STANDALONE_1" >&2
+  echo "$PC_PICK_NOT_STANDALONE_2" >&2
+  echo "$PC_PICK_NOT_STANDALONE_3" >&2
   exit 1
 fi
 
@@ -65,20 +75,20 @@ run_fzf() { printf '%s\n' "$files" | fzf "$@" 2>>"$log"; }
 set +e
 out="$(run_fzf \
   --print-query \
-  --prompt='open / create > ' \
+  --prompt="$PC_PICK_PROMPT" \
   --layout=reverse \
   --border=rounded \
   --info=inline \
   --color='border:#F2C200,prompt:#F2C200,pointer:#F2C200,hl:#FFD43B,hl+:#FFD43B,query:#f6f1df' \
-  --header='Pardus Code — type to filter, or type a new name + Enter to create')"
+  --header="$PC_PICK_HEADER")"
 code=$?
 # Exit 2 means fzf rejected an option (e.g. an older fzf that lacks a styling
 # flag used above). Retry with only the essentials so the finder still works.
 if [ "$code" -eq 2 ]; then
   out="$(run_fzf \
     --print-query \
-    --prompt='open / create > ' \
-    --header='Pardus Code: type to filter, or a new name + Enter to create')"
+    --prompt="$PC_PICK_PROMPT" \
+    --header="$PC_PICK_HEADER")"
   code=$?
 fi
 set -e
@@ -128,5 +138,6 @@ sleep 0.12
 tmux send-keys -t "$nano_pane" -l "$file"
 tmux send-keys -t "$nano_pane" Enter
 
-[ "$created" -eq 1 ] && tmux display-message -t "$session" "Pardus Code: created $file"
+[ "$created" -eq 1 ] && \
+  tmux display-message -t "$session" "$(printf "$PC_PICK_CREATED" "$file")"
 exit 0
