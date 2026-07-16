@@ -18,6 +18,7 @@
 #   OPENCODE_FORK       opencode fork to build (default https://github.com/ENux-Distro/opencode.git)
 #   OPENCODE_FORK_REF   branch/tag of the fork to build (default dev)
 #
+
 set -euo pipefail
 
 REPO="${PARDUS_CODE_REPO:-ENux-Distro/pardus-code}"
