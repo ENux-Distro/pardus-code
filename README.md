@@ -32,37 +32,42 @@ follows your system locale — **Turkish or English**.
 
 ## Install
 
-Requirements: `tmux` (≥ 3.2), `nano` (≥ 5), `fzf`. There's no separate opencode
-to install — the installer **builds the PARDUS-branded opencode from source** on
-first run (it installs the `bun` toolchain, clones the fork, and compiles it).
+### Debian / Pardus package — recommended
 
-### One-liner (recommended)
+**Pre-compiled: nothing to build, and it runs fine on low-RAM machines.** Grab
+the latest `pardus-code_*_amd64.deb` from the
+[Releases page](https://github.com/ENux-Distro/pardus-code/releases) and:
+
+```bash
+sudo apt install ./pardus-code_1.0.0_amd64.deb
+```
+
+That's it — `tmux`, `nano` and `fzf` are pulled in as dependencies, and the
+branded opencode ships inside the package. Run `pardus-code` and go.
+
+### Build from source — advanced
+
+This compiles the branded opencode on *your* machine, so it needs the `bun`
+toolchain and a few GB of RAM (a 4 GB VM is not enough). Prefer the `.deb` above
+unless you're hacking on Pardus Code itself.
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/ENux-Distro/pardus-code/main/install | bash
 ```
 
-It installs the dependencies, clones Pardus Code, compiles the branded opencode
-from the fork, and sets everything up under `~/.local`. The first build takes a
-few minutes; after that, launching is instant. System-wide:
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/ENux-Distro/pardus-code/main/install | PARDUS_CODE_PREFIX=/usr/local bash
-```
-
-### From source
+Or manually:
 
 ```bash
 git clone https://github.com/ENux-Distro/pardus-code
 cd pardus-code
 packaging/build-opencode.sh                          # builds -> vendor/opencode
 ./install.sh --with-deps                             # per-user (~/.local)
-sudo ./install.sh --prefix /usr/local --with-deps    # system-wide
 ```
 
 `build-opencode.sh` installs `bun`, clones the opencode fork over HTTPS, and
-compiles the binary into `vendor/opencode`. Point it at a different fork or
-branch with the `OPENCODE_FORK` / `OPENCODE_FORK_REF` environment variables.
+compiles the binary. Point it at a different fork/branch with `OPENCODE_FORK` /
+`OPENCODE_FORK_REF`. Package maintainers rebuild the `.deb` with
+`packaging/build-deb.sh` once `vendor/opencode` exists.
 
 ## Use
 
