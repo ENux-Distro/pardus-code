@@ -148,6 +148,20 @@ vendor/opencode            the built binary (gitignored; produced by the build)
   are never touched — config is layered via `OPENCODE_CONFIG` /
   `OPENCODE_TUI_CONFIG`.
 
+## Installation and Uninstallation
+
+### Installing via the .deb package
+
+```bash
+wget https://github.com/ENux-Distro/pardus-code/releases/download/Pardus-Code/pardus-code_amd64.deb       # downloads the Pardus Code .deb package
+sudo apt install ./pardus-code_amd64.deb      # Installs the .deb package via apt using sudo. 
+
+
+```bash
+packaging/build-opencode.sh        # re-clones the fork and rebuilds vendor/opencode
+./install.sh                       # re-install
+```
+
 ### Rebuilding the branded binary
 
 ```bash
@@ -155,11 +169,12 @@ packaging/build-opencode.sh        # re-clones the fork and rebuilds vendor/open
 ./install.sh                       # re-install
 ```
 
-## Uninstall
+### Uninstall
 
 ```bash
 ./uninstall.sh                       # or --prefix /usr/local
 ```
+
 
 ## License
 
