@@ -32,6 +32,20 @@ fi
 export PATH="$HOME/.bun/bin:$PATH"
 command -v bun >/dev/null 2>&1 || die "bun not found after install"
 
+# --- node-gyp ----------------------------------------------------------
+# Some of the fork's native addons (e.g. tree-sitter-powershell) run
+# "node-gyp rebuild" as an npm install script. Unlike npm, bun does not
+# bundle node-gyp, so `bun install` fails with "spawn node-gyp ENOENT"
+# unless it's already on PATH.
+if ! command -v node-gyp >/dev/null 2>&1; then
+  if command -v apt-get >/dev/null 2>&1; then
+    say "Installing node-gyp (needed to build native addons)…"
+    sudo apt-get update -qq && sudo apt-get install -y node-gyp
+  else
+    die "node-gyp is required to build native addons (e.g. tree-sitter-powershell). Install it and re-run (e.g. 'npm install -g node-gyp')."
+  fi
+fi
+
 # --- clone the fork --------------------------------------------------------
 work="$(mktemp -d)"; trap 'rm -rf "$work"' EXIT
 say "Cloning opencode fork ($OPENCODE_FORK @ $OPENCODE_FORK_REF)…"

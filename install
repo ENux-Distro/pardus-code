@@ -61,13 +61,16 @@ fi
 # git is needed to clone the repo; tmux/nano/fzf are the runtime deps;
 # build-essential (gcc/g++/make) and nodejs are needed to compile the branded
 # opencode binary (bun's build needs a C toolchain, plus node for some of the
-# fork's build scripts).
+# fork's build scripts). node-gyp is needed too: some of the fork's native
+# addons (e.g. tree-sitter-powershell) run "node-gyp rebuild" as an install
+# script, and unlike npm, bun does not bundle node-gyp itself.
 if [ "${PARDUS_CODE_NO_DEPS:-0}" != "1" ]; then
   need=()
   for c in git tmux nano fzf curl unzip; do command -v "$c" >/dev/null 2>&1 || need+=("$c"); done
   { command -v gcc >/dev/null 2>&1 && command -v g++ >/dev/null 2>&1 && command -v make >/dev/null 2>&1; } \
     || need+=("build-essential")
   command -v node >/dev/null 2>&1 || need+=("nodejs")
+  command -v node-gyp >/dev/null 2>&1 || need+=("node-gyp")
   if [ "${#need[@]}" -gt 0 ]; then
     if command -v apt-get >/dev/null 2>&1; then
       say "Installing dependencies: ${need[*]}"
