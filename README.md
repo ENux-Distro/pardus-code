@@ -7,6 +7,9 @@
 
 ---
 
+# **Status:** Stable
+
+
 Pardus Code glues together two tools that are already excellent on their own:
 
 - **[opencode](https://opencode.ai)** — a terminal AI coding agent — on the **left**
