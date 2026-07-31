@@ -19,6 +19,12 @@
 #   OPENCODE_FORK_REF   branch/tag of the fork to build (default dev)
 #
 
+# Why the hell is this installation script in the helpers directory?
+# How?
+# When?
+# With what cause?
+
+
 set -euo pipefail
 
 REPO="${PARDUS_CODE_REPO:-ENux-Distro/pardus-code}"
